@@ -7,7 +7,7 @@ Supports images, audio and video embeddings, and Leaflet TileLayer/geojson overl
 </p>
 
 ## Live links (replace with your own)
-- Leaflet Map https://victoria-vepreve.github.io/leaflet-storymaps-with-google-sheets/
+- Leaflet Map https://github.com/victoria-vepreve/IBXStoryMapvictoria-vepreve/IBXStoryMap
 - Google Sheets template https://docs.google.com/spreadsheets/d/1QJdJjfmrBgPU3awe3DeO3Ac5XPfga4XqhWY0XF3ah70/edit?usp=sharing
 
 ## Create Your Own
