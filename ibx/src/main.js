@@ -13,17 +13,20 @@ const STYLES = { dark: 'https://tiles.openfreemap.org/styles/dark', liberty: 'ht
                  positron: 'https://tiles.openfreemap.org/styles/positron', bright: 'https://tiles.openfreemap.org/styles/bright' };
 
 // ---------- 1. data ----------
+const t0 = performance.now();
 const [options, chaptersRaw, storesRaw, rail] = await Promise.all([
-  loadOptions(), loadTab('Chapters'), loadTab('Stores'), fetch('/data/rail.geojson').then(r => r.json()),
+  loadOptions(), loadTab('Chapters'), loadTab('Stores'), fetch(`${import.meta.env.BASE_URL}data/rail.geojson`).then(r => r.json()),
 ]);
 const chapters = chaptersRaw.filter(c => c.Chapter || c.Description);
+console.info(`data loaded in ${Math.round(performance.now() - t0)} ms`);
 const stores = storesRaw.filter(s => num(s.Latitude) !== null && !/delete me/i.test(s.Name));
 
 document.title = options['Storymap Title'] || 'IBX Storymap';
 
 // ---------- 2. map ----------
+const EDIT = new URLSearchParams(location.search).has('edit');
 export const map = new MLMap({
-  container: 'map', style: STYLES[(options['Basemap Tiles'] || 'dark').toLowerCase()] ?? STYLES.dark,
+  container: 'map', style: EDIT ? STYLES.liberty : (STYLES[(options['Basemap Tiles'] || 'dark').toLowerCase()] ?? STYLES.dark),
   center: SITE, zoom: 13, pitch: 45, bearing: -20,
   cooperativeGestures: true, attributionControl: { compact: true },
 });
@@ -96,15 +99,16 @@ function goTo(i) {
   const layers = words(c.Layers);
   showLayers(layers);
   markers.forEach((m, k) => m?.getElement().classList.toggle('active', k === i));
-  location.hash = `ch${i + 1}`;
+  history.replaceState(null, '', `#ch${i + 1}`);
+  document.getElementById('counter').textContent = `${i + 1} / ${chapters.length}`;
 
   if ((i === 0 || layers.includes('fit-ibx')) && ibxBounds) {
-    map.fitBounds(ibxBounds, { padding: { top: 80, bottom: 80, left: 480, right: 80 }, pitch: num(c.Pitch) ?? 35, bearing: num(c.Bearing) ?? -20, duration: 2000 });
+    map.fitBounds(ibxBounds, { padding: innerWidth > 760 ? { top: 80, bottom: 80, left: 500, right: 80 } : { top: innerHeight * 0.05, bottom: innerHeight * 0.6, left: 30, right: 30 }, pitch: num(c.Pitch) ?? 35, bearing: num(c.Bearing) ?? -20, duration: 2000 });
     return;
   }
   const lat = num(c.Latitude), lon = num(c.Longitude);
   if (lat === null || lon === null) return;              // chapter without a place: keep camera
-  map.flyTo({ center: [lon, lat], zoom: num(c.Zoom) ?? 15, pitch: num(c.Pitch) ?? 50, bearing: num(c.Bearing) ?? -20, duration: 1800, essential: true });
+  map.flyTo({ center: [lon, lat], zoom: num(c.Zoom) ?? 15, padding: innerWidth > 760 ? { left: 460 } : { bottom: innerHeight * 0.55 }, pitch: num(c.Pitch) ?? 50, bearing: num(c.Bearing) ?? -20, duration: 1800, essential: true });
 }
 
 // ---------- 7. markers ----------
@@ -139,13 +143,14 @@ map.on('load', () => {
   map.addLayer({ id: 'research-area-fill', type: 'fill', source: 'area', paint: { 'fill-color': '#ff6319', 'fill-opacity': 0.12 } });
   map.addLayer({ id: 'research-area-line', type: 'line', source: 'area', paint: { 'line-color': '#ff6319', 'line-width': 2.5, 'line-dasharray': [3, 2] } });
   map.addLayer({ id: 'f-line', type: 'line', source: 'rail', filter: ['all', isLine, ['in', ['get', 'name'], ['literal', F_NAMES]]],
-    layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#ff6319', 'line-width': 4 } });
+    layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#ff6319', 'line-width': ['interpolate', ['linear'], ['zoom'], 10, 1.5, 13, 3, 16, 5], 'line-opacity': ['interpolate', ['linear'], ['zoom'], 10, 0.5, 13, 0.95] } });
   map.addLayer({ id: 'ibx-glow', type: 'line', source: 'rail', filter: ['all', isLine, ['==', ['get', 'name'], 'Bay Ridge Branch']],
     layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#00c2d1', 'line-width': 14, 'line-blur': 10, 'line-opacity': 0.5 } });
   map.addLayer({ id: 'ibx', type: 'line', source: 'rail', filter: ['all', isLine, ['==', ['get', 'name'], 'Bay Ridge Branch']],
     layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#00c2d1', 'line-width': 5, 'line-dasharray': [2, 1.5] } });
-  map.addLayer({ id: 'stations', type: 'circle', source: 'rail', filter: ['all', ['==', ['geometry-type'], 'Point'], ['==', ['get', 'railway'], 'station']],
-    paint: { 'circle-radius': 4.5, 'circle-color': '#111', 'circle-stroke-color': '#fff', 'circle-stroke-width': 1.5 } });
+  map.addLayer({ id: 'stations', type: 'circle', source: 'rail', minzoom: 12.5, filter: ['all', ['==', ['geometry-type'], 'Point'], ['==', ['get', 'railway'], 'station']],
+    paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 12.5, 2, 15, 4.5, 17, 6], 'circle-color': '#111', 'circle-stroke-color': '#fff',
+             'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 12.5, 0.8, 15, 1.5], 'circle-opacity': ['interpolate', ['linear'], ['zoom'], 12.5, 0, 13.5, 1] } });
   map.addLayer({ id: 'stores', type: 'circle', source: 'stores',
     paint: { 'circle-radius': 6, 'circle-color': '#fbbf24', 'circle-stroke-color': '#111', 'circle-stroke-width': 1.5 } });
   map.addLayer({ id: 'stores-interviewed', type: 'circle', source: 'stores', filter: ['==', ['get', 'interviewed'], true],
@@ -167,4 +172,16 @@ map.on('load', () => {
 
   scrollama().setup({ step: '.step', offset: 0.55 }).onStepEnter(({ index }) => goTo(index));
   goTo(0);
+
+  if (EDIT) {
+    const tip = document.createElement('div'); tip.id = 'edit-tip';
+    tip.innerHTML = '<b>Edit mode</b> — click the map to copy coordinates. Paste into the Sheet as Latitude / Longitude.';
+    document.body.appendChild(tip);
+    map.getCanvas().style.cursor = 'crosshair';
+    map.on('click', e => {
+      const lat = e.lngLat.lat.toFixed(6), lon = e.lngLat.lng.toFixed(6);
+      navigator.clipboard?.writeText(`${lat}\t${lon}`);
+      new Popup({ offset: 8 }).setLngLat(e.lngLat).setHTML(`<b>Latitude</b> ${lat}<br><b>Longitude</b> ${lon}<br><small>copied (paste into two cells)</small>`).addTo(map);
+    });
+  }
 });

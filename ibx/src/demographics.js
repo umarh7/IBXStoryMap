@@ -19,7 +19,7 @@ export const DEMO_REGISTRY = Object.fromEntries([
 ]);
 
 export function addDemographics(map, beforeId) {
-  map.addSource('tracts', { type: 'geojson', data: '/data/tracts.geojson', generateId: true });
+  map.addSource('tracts', { type: 'geojson', data: `${import.meta.env.BASE_URL}data/tracts.geojson`, generateId: true });
 
   for (const [key, m] of Object.entries(METRICS)) {
     map.addLayer({

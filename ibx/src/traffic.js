@@ -15,8 +15,8 @@ function circle([lon, lat], meters, n = 64) {
 }
 
 export function addTraffic(map, beforeId, site) {
-  map.addSource('crashes', { type: 'geojson', data: '/data/crashes.geojson' });
-  map.addSource('bus', { type: 'geojson', data: '/data/bus.geojson' });
+  map.addSource('crashes', { type: 'geojson', data: `${import.meta.env.BASE_URL}data/crashes.geojson` });
+  map.addSource('bus', { type: 'geojson', data: `${import.meta.env.BASE_URL}data/bus.geojson` });
   map.addSource('walkshed', { type: 'geojson', data: circle(site, 800) });
 
   map.addLayer({ id: 'walkshed-fill', type: 'fill', source: 'walkshed', layout: { visibility: 'none' },

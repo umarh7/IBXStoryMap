@@ -11,7 +11,7 @@ export async function loadTab(tab) {
     return data.map(r => Object.fromEntries(Object.entries(r).map(([k, v]) => [k, (v ?? '').trim()])));
   } catch (e) {
     console.warn(`Sheet tab "${tab}" unavailable (${e}); using local fallback`);
-    return fetch(`/data/${tab.toLowerCase()}.json`).then(r => r.ok ? r.json() : []);
+    return fetch(`${import.meta.env.BASE_URL}data/${tab.toLowerCase()}.json`).then(r => r.ok ? r.json() : []);
   }
 }
 
