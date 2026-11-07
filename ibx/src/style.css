@@ -1,0 +1,64 @@
+:root {
+  --panel-w: 420px;
+  --bg: #0f1115;
+  --card: rgba(22, 25, 31, 0.92);
+  --text: #e8eaf0;
+  --accent: #ff6319;
+  --ibx: #00c2d1;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
+  font-family: Inter, system-ui, -apple-system, sans-serif; }
+#map { position: fixed; inset: 0; z-index: 0; }
+#story { position: relative; z-index: 1; width: var(--panel-w); margin-left: 5vw; pointer-events: none; }
+.step { min-height: 90vh; display: flex; align-items: center; }
+.step > * { pointer-events: auto; }
+.card { background: var(--card); padding: 1.25rem 1.5rem; border-left: 4px solid var(--accent);
+  backdrop-filter: blur(6px); border-radius: 0 8px 8px 0; opacity: .45; transform: translateX(-8px);
+  transition: opacity .4s ease, transform .4s ease; }
+.step.active .card { opacity: 1; transform: none; }
+.card h1 { font-size: 2rem; line-height: 1.15; margin: 0 0 .75rem; }
+.card h2 { font-size: 1.4rem; margin: 0 0 .6rem; color: var(--accent); }
+.card p  { margin: 0; font-size: 1.05rem; line-height: 1.55; }
+.maplibregl-popup-content { background: var(--card); color: var(--text); }
+@media (max-width: 700px) { :root { --panel-w: 90vw; } }
+
+/* ---- title / end cards ---- */
+.title-card { min-height: 80vh; display: flex; flex-direction: column; justify-content: center; pointer-events: auto; }
+.title-card h1 { font-size: 2.6rem; line-height: 1.1; margin: .5rem 0; text-shadow: 0 2px 12px #000; }
+.title-card .subtitle { font-size: 1.15rem; opacity: .85; }
+.title-card .logo { max-height: 56px; width: auto; align-self: flex-start; }
+.end-card { min-height: 60vh; display: flex; align-items: center; pointer-events: auto; }
+.end-card a { color: var(--accent); text-decoration: none; }
+
+/* ---- chapter cards ---- */
+.card h2 .num { display: inline-grid; place-items: center; width: 1.6em; height: 1.6em; margin-right: .5em;
+  border-radius: 50%; background: var(--accent); color: #000; font-size: .8em; }
+.card figure { margin: .75rem 0; }
+.card figure img, .card figure iframe { width: 100%; max-height: 300px; object-fit: cover; border-radius: 6px; display: block; }
+.card figure iframe { aspect-ratio: 16/9; height: auto; border: 0; }
+.card figure audio { width: 100%; }
+.card figcaption { font-size: .8rem; opacity: .7; margin-top: .3rem; }
+.card figcaption a { color: var(--ibx); }
+.card .description { font-size: 1.02rem; line-height: 1.6; }
+.card .description a { color: var(--ibx); }
+
+/* ---- numbered map markers ---- */
+.ch-marker { width: 30px; height: 30px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg);
+  background: var(--c); border: 2px solid #fff; color: #000; font-weight: 700; cursor: pointer;
+  display: grid; place-items: center; box-shadow: 0 2px 8px #000a; transition: transform .25s; }
+.ch-marker > * , .ch-marker { font-size: 13px; }
+.ch-marker.active { transform: rotate(-45deg) scale(1.35); z-index: 2; }
+.maplibregl-popup-content blockquote { margin: .4rem 0 0; font-style: italic; opacity: .9; }
+
+/* ---- legend ---- */
+#legend { position: fixed; right: 16px; bottom: 36px; z-index: 5; width: 240px; padding: .8rem 1rem;
+  background: var(--card); color: var(--text); border-radius: 8px; backdrop-filter: blur(6px); font-size: .85rem; }
+#legend[hidden] { display: none; }
+#legend h4 { margin: 0 0 .5rem; font-size: .9rem; }
+#legend .bar { height: 10px; border-radius: 5px; }
+#legend .ticks { display: flex; justify-content: space-between; font-size: .75rem; opacity: .8; margin: .2rem 0 .4rem; }
+#legend ul.cat { list-style: none; padding: 0; margin: 0 0 .4rem; }
+#legend ul.cat li { display: flex; align-items: center; gap: .5rem; margin: .15rem 0; }
+#legend ul.cat i { width: 14px; height: 14px; border-radius: 3px; }
+#legend small { opacity: .6; }

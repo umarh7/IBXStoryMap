@@ -1,0 +1,22 @@
+[
+  {
+    "Chapter": "The Interborough Express at Avenue I",
+    "Description": "A 14-mile light rail line connecting Brooklyn and Queens along an existing freight corridor. Our research site: where it meets the F train at Avenue I / McDonald Avenue.",
+    "Latitude": 40.6253, "Longitude": -73.9761, "Zoom": 13
+  },
+  {
+    "Chapter": "The corridor today",
+    "Description": "The Bay Ridge Branch carries a handful of freight trains a day through dense residential Brooklyn — a rail line most neighbors have never ridden.",
+    "Latitude": 40.6400, "Longitude": -73.9500, "Zoom": 12
+  },
+  {
+    "Chapter": "Avenue I station",
+    "Description": "The F stops here on the McDonald Avenue elevated. IBX would add a transfer below, turning a one-line stop into a crosstown hub.",
+    "Latitude": 40.6253, "Longitude": -73.9761, "Zoom": 16
+  },
+  {
+    "Chapter": "Who lives here",
+    "Description": "Placeholder — demographic choropleth goes here in a later step.",
+    "Latitude": 40.6253, "Longitude": -73.9761, "Zoom": 14
+  }
+]
