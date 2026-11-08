@@ -6,6 +6,7 @@ import scrollama from 'scrollama';
 import { loadTab, loadOptions, num, words } from './sheet.js';
 import { addDemographics, DEMO_REGISTRY, showLegend } from './demographics.js';
 import { addTraffic, TRAFFIC_REGISTRY } from './traffic.js';
+import { renderChart } from './charts.js';
 setWorkerUrl(workerUrl);
 
 const SITE = [-73.9764, 40.6273];                       // proposed IBX stop at McDonald Ave
@@ -56,6 +57,7 @@ document.getElementById('story').innerHTML = `
     <h2><span class="num">${i + 1}</span>${c.Chapter}</h2>
     ${mediaHTML(c)}
     <div class="description">${c.Description}</div>
+    ${c.Chart ? `<figure class="chart"><canvas data-chart="${c.Chart.trim().toLowerCase()}" height="140"></canvas><figcaption></figcaption></figure>` : ''}
   </div></section>`).join('') +
   `<footer class="end-card"><a href="#ch1">↑ Back to top</a></footer>`;
 
@@ -172,6 +174,7 @@ map.on('load', () => {
 
   scrollama().setup({ step: '.step', offset: 0.55 }).onStepEnter(({ index }) => goTo(index));
   goTo(0);
+  document.querySelectorAll('canvas[data-chart]').forEach(cv => renderChart(cv, cv.dataset.chart, SITE, import.meta.env.BASE_URL));
 
   if (EDIT) {
     const tip = document.createElement('div'); tip.id = 'edit-tip';
