@@ -128,7 +128,7 @@ function goTo(i) {
   history.replaceState(null, '', `#ch${i + 1}`);
   document.getElementById('counter').textContent = `${i + 1} / ${chapters.length}`;
 
-  const fit = layers.includes('fit-ibx') ? 'ibx' : (layers.includes('fit-overview') || i === 0) ? 'overview' : null;
+  const fit = layers.includes('fit-ibx') ? 'ibx' : layers.includes('fit-overview') ? 'overview' : null;
   if (fit && BOUNDS[fit]) {
     map.fitBounds(BOUNDS[fit], { padding: pad(), pitch: num(c.Pitch) ?? (fit === 'ibx' ? 50 : 28), bearing: num(c.Bearing) ?? (fit === 'ibx' ? -35 : -12),
       duration: 2600, essential: true });
