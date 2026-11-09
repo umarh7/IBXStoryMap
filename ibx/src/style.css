@@ -57,8 +57,8 @@ a { color: var(--ibx); }
 #counter:empty { display: none; }
 
 .ch-marker { width: 26px; height: 26px; border-radius: 50%; background: var(--c); border: 3px solid #fff; color: #000; font-weight: 700; font-size: 12px;
-  cursor: pointer; display: grid; place-items: center; box-shadow: 0 2px 10px #000c; transition: transform .25s; }
-.ch-marker.active { transform: scale(1.4); z-index: 2; }
+  cursor: pointer; display: grid; place-items: center; box-shadow: 0 2px 10px #000c; transition: width .2s, height .2s, opacity .2s, font-size .2s; will-change: transform; }
+.ch-marker.active { z-index: 2; }
 
 #legend { position: fixed; right: 16px; bottom: 36px; z-index: 5; width: 250px; padding: .9rem 1rem; background: var(--panel);
   backdrop-filter: blur(10px); border-radius: 4px; font-size: .85rem; }
@@ -93,7 +93,7 @@ a { color: var(--ibx); }
 }
 
 .ch-marker { width: 16px; height: 16px; font-size: 0; border-width: 2px; opacity: .75; }
-.ch-marker.active { width: 30px; height: 30px; font-size: 13px; border-width: 3px; opacity: 1; transform: none; }
+.ch-marker.active { width: 30px; height: 30px; font-size: 13px; border-width: 3px; opacity: 1; }
 
 #edit-tip { position: fixed; top: 14px; left: 50%; transform: translateX(-50%); z-index: 6; padding: .5rem .9rem; border-radius: 4px;
   background: #fde047; color: #111; font-size: .85rem; box-shadow: 0 2px 10px #0008; }
