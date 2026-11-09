@@ -31,7 +31,8 @@ export const map = new MLMap({
   center: SITE, zoom: 13, pitch: 45, bearing: -20,
   cooperativeGestures: true, attributionControl: { compact: true },
 });
-map.addControl(new NavigationControl({ visualizePitch: true }), 'top-right');
+if (EDIT) map.addControl(new NavigationControl({ visualizePitch: true }), 'top-right');
+else ['dragPan', 'scrollZoom', 'boxZoom', 'dragRotate', 'keyboard', 'doubleClickZoom', 'touchZoomRotate', 'touchPitch'].forEach(h => map[h].disable());
 
 // ---------- 3. narrative DOM ----------
 function mediaHTML(c) {
