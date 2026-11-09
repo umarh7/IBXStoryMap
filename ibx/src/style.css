@@ -101,3 +101,10 @@ a { color: var(--ibx); }
 
 .card figure.chart { margin: 1rem 0 0; }
 .card figure.chart canvas { width: 100% !important; height: 140px !important; }
+
+.site-marker { width: 22px; height: 22px; border-radius: 50%; background: var(--accent); border: 3px solid #fff;
+  box-shadow: 0 0 0 6px rgba(255, 99, 25, .3), 0 2px 10px #000c; }
+.site-marker::after { content: ""; position: absolute; inset: -14px; border-radius: 50%; border: 2px solid var(--accent); opacity: .6;
+  animation: site-pulse 2.4s ease-out infinite; }
+@keyframes site-pulse { from { transform: scale(.5); opacity: .7; } to { transform: scale(1.4); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .site-marker::after { animation: none; } }

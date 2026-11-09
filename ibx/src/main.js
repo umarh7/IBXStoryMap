@@ -115,9 +115,10 @@ function goTo(i) {
 }
 
 // ---------- 7. markers ----------
+const SHOW_CH_MARKERS = /^y/i.test(options['Chapter Markers'] || '');
 const markers = chapters.map((c, i) => {
   const lat = num(c.Latitude), lon = num(c.Longitude);
-  if (lat === null || lon === null || /hidden/i.test(c.Marker)) return null;
+  if (!SHOW_CH_MARKERS || lat === null || lon === null || /hidden/i.test(c.Marker)) return null;
   const el = document.createElement('div'); el.className = 'ch-marker';
   el.textContent = /numbered/i.test(c.Marker) || !c.Marker ? i + 1 : (/plain/i.test(c.Marker) ? '' : c.Marker);
   el.style.setProperty('--c', c['Marker Color'] || '#ff6319');
@@ -159,8 +160,11 @@ map.on('load', () => {
   map.addLayer({ id: 'stores-interviewed', type: 'circle', source: 'stores', filter: ['==', ['get', 'interviewed'], true],
     paint: { 'circle-radius': 9, 'circle-color': '#22c55e', 'circle-stroke-color': '#fff', 'circle-stroke-width': 2 } });
 
-  // bounds of the IBX line for the opening shot
-  ibxBounds = rail.features.filter(f => f.geometry.type === 'LineString' && f.properties.name === 'Bay Ridge Branch')
+  const siteEl = document.createElement('div'); siteEl.className = 'site-marker'; siteEl.title = 'Proposed IBX stop · McDonald Ave / Avenue I';
+  new Marker({ element: siteEl, anchor: 'center' }).setLngLat(SITE).addTo(map);
+
+  // opening shot: IBX + the Brooklyn F (Culver) line together
+  ibxBounds = rail.features.filter(f => f.geometry.type === 'LineString' && ['Bay Ridge Branch', 'IND Culver Line'].includes(f.properties.name))
     .flatMap(f => f.geometry.coordinates).reduce((b, c) => b.extend(c), new LngLatBounds());
 
   // popups
