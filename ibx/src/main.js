@@ -68,7 +68,7 @@ document.getElementById('story').innerHTML = `
 // ---------- 4. layer registry: Sheet word → map layer ids ----------
 const REGISTRY = {
   'ibx':           ['ibx-glow', 'ibx'],
-  'f-line':        ['f-line', 'f-line-far'],
+  'f-line':        ['f-glow', 'f-line', 'f-line-far'],
   'stations':      ['stations'],
   'research-area': ['research-area-fill', 'research-area-line'],
   'stores':        ['stores'],
@@ -174,8 +174,10 @@ map.on('load', () => {
   map.addLayer({ id: 'research-area-line', type: 'line', source: 'area', paint: { 'line-color': '#ff6319', 'line-width': 2.5, 'line-dasharray': [3, 2] } });
   map.addLayer({ id: 'f-line-far', type: 'line', source: 'rail', filter: ['all', isLine, ['in', ['get', 'name'], ['literal', F_NAMES.filter(n => n !== 'IND Culver Line')]]],
     layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#ff6319', 'line-width': 1.5, 'line-opacity': 0.25 } });
+  map.addLayer({ id: 'f-glow', type: 'line', source: 'rail', filter: ['all', isLine, ['==', ['get', 'name'], 'IND Culver Line']],
+    layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#ff6319', 'line-width': 14, 'line-blur': 10, 'line-opacity': 0.45 } });
   map.addLayer({ id: 'f-line', type: 'line', source: 'rail', filter: ['all', isLine, ['==', ['get', 'name'], 'IND Culver Line']],
-    layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#ff6319', 'line-width': ['interpolate', ['linear'], ['zoom'], 10, 1.5, 13, 3, 16, 5], 'line-opacity': ['interpolate', ['linear'], ['zoom'], 10, 0.5, 13, 0.95] } });
+    layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#ff6319', 'line-width': 5, 'line-opacity': 1 } });
   map.addLayer({ id: 'ibx-glow', type: 'line', source: 'rail', filter: ['all', isLine, ['==', ['get', 'name'], 'Bay Ridge Branch']],
     layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#00c2d1', 'line-width': 14, 'line-blur': 10, 'line-opacity': 0.5 } });
   map.addLayer({ id: 'ibx', type: 'line', source: 'rail', filter: ['all', isLine, ['==', ['get', 'name'], 'Bay Ridge Branch']],
