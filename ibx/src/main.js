@@ -52,6 +52,9 @@ document.getElementById('story').innerHTML = `
     ${options['Storymap Logo'] ? `<img class="logo" src="${options['Storymap Logo']}" alt="">` : ''}
     <h1>${options['Storymap Title'] || ''}</h1>
     <div class="subtitle">${options['Storymap Subtitle'] || ''}</div>
+    <ul class="stats">${(options['Title Stats'] || '14 miles of track; 19 stations; 17 subway line connections; 115,000 projected daily riders')
+      .split(';').map(t => t.trim()).filter(Boolean).map(t => { const m = t.match(/^([\d.,]+[kK]?)\s*(.*)$/); return `<li>${m ? `<b>${m[1]}</b> ${m[2]}` : t}</li>`; }).join('')}</ul>
+    <small class="source">IBX figures: MTA Interborough Express project pages</small>
   </header>` +
   chapters.map((c, i) => `
   <section class="step" data-step="${i}" id="ch${i + 1}"><div class="card">
@@ -65,7 +68,7 @@ document.getElementById('story').innerHTML = `
 // ---------- 4. layer registry: Sheet word → map layer ids ----------
 const REGISTRY = {
   'ibx':           ['ibx-glow', 'ibx'],
-  'f-line':        ['f-line'],
+  'f-line':        ['f-line', 'f-line-far'],
   'stations':      ['stations'],
   'research-area': ['research-area-fill', 'research-area-line'],
   'stores':        ['stores'],
@@ -76,12 +79,31 @@ const REGISTRY = {
 };
 const ALWAYS = new Set(['buildings-3d']);
 
+const OPACITY = { fill: ['fill-opacity'], line: ['line-opacity'], circle: ['circle-opacity', 'circle-stroke-opacity'],
+                  heatmap: ['heatmap-opacity'], 'fill-extrusion': ['fill-extrusion-opacity'] };
+const original = new Map(), hideTimers = new Map();
+function setVisible(id, vis) {
+  const layer = map.getLayer(id); if (!layer) return;
+  const props = OPACITY[layer.type] ?? [];
+  if (!original.has(id)) {
+    original.set(id, props.map(pp => map.getPaintProperty(id, pp) ?? 1));
+    props.forEach(pp => map.setPaintProperty(id, `${pp}-transition`, { duration: 700, delay: 0 }));
+  }
+  clearTimeout(hideTimers.get(id));
+  if (vis) {
+    map.setLayoutProperty(id, 'visibility', 'visible');
+    requestAnimationFrame(() => props.forEach((pp, k) => map.setPaintProperty(id, pp, original.get(id)[k])));
+  } else {
+    props.forEach(pp => map.setPaintProperty(id, pp, 0));
+    hideTimers.set(id, setTimeout(() => map.setLayoutProperty(id, 'visibility', 'none'), 750));
+  }
+}
 function showLayers(wanted) {
   const on = new Set();
   for (const w of wanted) (REGISTRY[w] ?? []).forEach(id => on.add(id));
   for (const [w, ids] of Object.entries(REGISTRY)) {
     const vis = ALWAYS.has(w) || ids.some(id => on.has(id));
-    ids.forEach(id => map.getLayer(id) && map.setLayoutProperty(id, 'visibility', vis ? 'visible' : 'none'));
+    ids.forEach(id => setVisible(id, vis));
   }
   showLegend(wanted);
 }
@@ -95,7 +117,8 @@ function researchArea() {
 }
 
 // ---------- 6. camera ----------
-let ibxBounds;
+const BOUNDS = {};
+const pad = () => innerWidth > 760 ? { top: 70, bottom: 70, left: 520, right: 70 } : { top: innerHeight * 0.05, bottom: innerHeight * 0.6, left: 24, right: 24 };
 function goTo(i) {
   const c = chapters[i];
   document.querySelectorAll('.step').forEach((s, k) => s.classList.toggle('active', k === i));
@@ -105,13 +128,16 @@ function goTo(i) {
   history.replaceState(null, '', `#ch${i + 1}`);
   document.getElementById('counter').textContent = `${i + 1} / ${chapters.length}`;
 
-  if ((i === 0 || layers.includes('fit-ibx')) && ibxBounds) {
-    map.fitBounds(ibxBounds, { padding: innerWidth > 760 ? { top: 80, bottom: 80, left: 500, right: 80 } : { top: innerHeight * 0.05, bottom: innerHeight * 0.6, left: 30, right: 30 }, pitch: num(c.Pitch) ?? 35, bearing: num(c.Bearing) ?? -20, duration: 2000 });
+  const fit = layers.includes('fit-ibx') ? 'ibx' : (layers.includes('fit-overview') || i === 0) ? 'overview' : null;
+  if (fit && BOUNDS[fit]) {
+    map.fitBounds(BOUNDS[fit], { padding: pad(), pitch: num(c.Pitch) ?? (fit === 'ibx' ? 50 : 28), bearing: num(c.Bearing) ?? (fit === 'ibx' ? -35 : -12),
+      duration: 2600, essential: true });
     return;
   }
   const lat = num(c.Latitude), lon = num(c.Longitude);
-  if (lat === null || lon === null) return;              // chapter without a place: keep camera
-  map.flyTo({ center: [lon, lat], zoom: num(c.Zoom) ?? 15, padding: innerWidth > 760 ? { left: 460 } : { bottom: innerHeight * 0.55 }, pitch: num(c.Pitch) ?? 50, bearing: num(c.Bearing) ?? -20, duration: 1800, essential: true });
+  if (lat === null || lon === null) return;
+  map.flyTo({ center: [lon, lat], zoom: num(c.Zoom) ?? 15.5, pitch: num(c.Pitch) ?? 58, bearing: num(c.Bearing) ?? 24,
+    padding: innerWidth > 760 ? { left: 460 } : { bottom: innerHeight * 0.55 }, curve: 1.5, speed: 0.9, essential: true });
 }
 
 // ---------- 7. markers ----------
@@ -146,7 +172,9 @@ map.on('load', () => {
 
   map.addLayer({ id: 'research-area-fill', type: 'fill', source: 'area', paint: { 'fill-color': '#ff6319', 'fill-opacity': 0.12 } });
   map.addLayer({ id: 'research-area-line', type: 'line', source: 'area', paint: { 'line-color': '#ff6319', 'line-width': 2.5, 'line-dasharray': [3, 2] } });
-  map.addLayer({ id: 'f-line', type: 'line', source: 'rail', filter: ['all', isLine, ['in', ['get', 'name'], ['literal', F_NAMES]]],
+  map.addLayer({ id: 'f-line-far', type: 'line', source: 'rail', filter: ['all', isLine, ['in', ['get', 'name'], ['literal', F_NAMES.filter(n => n !== 'IND Culver Line')]]],
+    layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#ff6319', 'line-width': 1.5, 'line-opacity': 0.25 } });
+  map.addLayer({ id: 'f-line', type: 'line', source: 'rail', filter: ['all', isLine, ['==', ['get', 'name'], 'IND Culver Line']],
     layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#ff6319', 'line-width': ['interpolate', ['linear'], ['zoom'], 10, 1.5, 13, 3, 16, 5], 'line-opacity': ['interpolate', ['linear'], ['zoom'], 10, 0.5, 13, 0.95] } });
   map.addLayer({ id: 'ibx-glow', type: 'line', source: 'rail', filter: ['all', isLine, ['==', ['get', 'name'], 'Bay Ridge Branch']],
     layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#00c2d1', 'line-width': 14, 'line-blur': 10, 'line-opacity': 0.5 } });
@@ -163,9 +191,10 @@ map.on('load', () => {
   const siteEl = document.createElement('div'); siteEl.className = 'site-marker'; siteEl.title = 'Proposed IBX stop · McDonald Ave / Avenue I';
   new Marker({ element: siteEl, anchor: 'center' }).setLngLat(SITE).addTo(map);
 
-  // opening shot: IBX + the Brooklyn F (Culver) line together
-  ibxBounds = rail.features.filter(f => f.geometry.type === 'LineString' && ['Bay Ridge Branch', 'IND Culver Line'].includes(f.properties.name))
+  const boundsOf = names => rail.features.filter(f => f.geometry.type === 'LineString' && names.includes(f.properties.name))
     .flatMap(f => f.geometry.coordinates).reduce((b, c) => b.extend(c), new LngLatBounds());
+  BOUNDS.overview = boundsOf(['Bay Ridge Branch', 'IND Culver Line']);
+  BOUNDS.ibx = boundsOf(['Bay Ridge Branch']);
 
   // popups
   const pop = new Popup({ closeButton: false, offset: 12, maxWidth: '280px' });

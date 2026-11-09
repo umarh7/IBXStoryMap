@@ -108,3 +108,8 @@ a { color: var(--ibx); }
   animation: site-pulse 2.4s ease-out infinite; }
 @keyframes site-pulse { from { transform: scale(.5); opacity: .7; } to { transform: scale(1.4); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .site-marker::after { animation: none; } }
+
+.title-card .stats { list-style: none; padding: 0; margin: 1.6rem 0 0; display: grid; grid-template-columns: 1fr 1fr; gap: .6rem 1.2rem; max-width: 34ch; }
+.title-card .stats li { font-size: .92rem; color: var(--muted); line-height: 1.3; text-shadow: 0 1px 6px #000; }
+.title-card .stats b { display: block; font-size: 1.5rem; font-weight: 800; font-stretch: 108%; color: var(--text); letter-spacing: -.01em; }
+.title-card .source { margin-top: .9rem; color: var(--muted); opacity: .7; font-size: .72rem; }
