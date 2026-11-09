@@ -1,5 +1,5 @@
 import csv, io, json, urllib.request
-SHEET = '1GwFD3xJSq5wqUit-ZQm4mX3OrzQrjRwxOF_7k7nKKu4'
+SHEET = 'NEW_ID'
 for tab in ('Chapters', 'Options', 'Stores'):
     url = f'https://docs.google.com/spreadsheets/d/{SHEET}/gviz/tq?tqx=out:csv&sheet={tab}'
     text = urllib.request.urlopen(urllib.request.Request(url, headers={'User-Agent': 'ibx-storymap/0.1'}), timeout=60).read().decode('utf-8')

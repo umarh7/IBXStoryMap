@@ -1,6 +1,6 @@
 import Papa from 'papaparse';
 
-export const SHEET_ID = '1GwFD3xJSq5wqUit-ZQm4mX3OrzQrjRwxOF_7k7nKKu4';
+export const SHEET_ID = 'NEW_ID';
 const url = tab => `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tab)}`;
 
 /** Fetch one tab as an array of row objects keyed by header. Falls back to /data/<tab>.json if Google is unreachable. */
